@@ -14,6 +14,9 @@ handlers:
 
 - url: /
   script: controllers.main.app
+
+- url: /contact
+  script: controllers.contact.app
   
   
 libraries:
