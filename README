@@ -1,3 +1,6 @@
 A web site to provide examples/demos of the information presented in Code: The Hidden Language of Computer Hardware and Software.
 
+The main purpose of this project is to help me learn HTML5, CoffeeScript and using Git.
+
+The app is written using Google App Engine (Python) and will be hosted at speakcode.appspot.com
  
