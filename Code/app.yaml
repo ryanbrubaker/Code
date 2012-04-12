@@ -21,6 +21,9 @@ handlers:
 - url: /contact_thank_you
   script: controllers.contact_thank_you.app
   
+- url: /best_friends
+  script: controllers.best_friends.app
+  
   
 libraries:
 - name: webapp2

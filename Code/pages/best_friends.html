@@ -1,0 +1,31 @@
+{% extends "templates/base.html" %}
+
+{% block headerBar %}
+   <li><a href="/">Home</a></li>
+   <li><a href="/contact">Contact</a></li>
+{% endblock headerBar %}
+
+
+{% block content %}
+
+<h1>Best Friends</h1>
+<p>Send Morse code to your friend across the street.</p>
+
+
+<br />
+<br />
+
+<div class="row">
+   <div class="span2">
+      <a class="btn" id="morse-sender">Morse Code</a></p>
+   </div>
+   
+   <div class="span1 offset6">
+      <textarea id="morse-receiver"></textarea>
+   </div>
+</div>
+{% endblock content %}
+
+{% block extrajs %}
+   <script src="/public/js/best_friends.js"></script>
+{% endblock extrajs %}
