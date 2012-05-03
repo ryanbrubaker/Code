@@ -24,4 +24,15 @@
     return dashFlag = true;
   };
 
+  $(function() {
+    return $(document).ready(function() {
+      var context;
+      context = document.getElementById("morseCanvas").getContext('2d');
+      context.moveTo(5, 25);
+      context.lineTo(470, 25);
+      context.strokeStyle = "#000";
+      return context.stroke();
+    });
+  });
+
 }).call(this);

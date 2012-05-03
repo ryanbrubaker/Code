@@ -1,5 +1,6 @@
 {% extends "templates/base.html" %}
 
+
 {% block headerBar %}
    <li><a href="/">Home</a></li>
    <li><a href="/contact">Contact</a></li>
@@ -20,10 +21,17 @@
       <a class="btn" id="morse-sender">Morse Code</a></p>
    </div>
    
-   <div class="span1 offset6">
+   <div class="span6">
+      <canvas id="morseCanvas" width="475" height="50"></canvas>
+   </div>
+   
+   <div class="span1 offset1">
       <textarea id="morse-receiver"></textarea>
    </div>
 </div>
+
+<br />
+<br />
 
 <div class="row">
    <table class="table table-bordered">
