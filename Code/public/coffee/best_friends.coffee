@@ -4,20 +4,76 @@ kDashToken = 1
 kWordStopToken = 2
 
 class CommunicationLine extends Backbone.Model
-   initialize: ->
+   initialize: (options) =>
       @inputQueue = []
       @communicationLine = ['', '', '', '', '', '', '', '', '', '']
+      @decoder = options.decoder
       setInterval(@moveDataOneStep, 100)
 
    addToken: (token) =>
-      @inputQueue.push token
+      @inputQueue.push(token)
 
    moveDataOneStep: =>
-      @trigger 'tokenReachedReceiver', @communicationLine.pop()
+      @decoder.processToken(@communicationLine.pop())
       nextToken = @inputQueue.shift()
       @communicationLine.unshift(if undefined == nextToken then '' else nextToken)
-      @trigger 'hasNewData', @communicationLine
+      @trigger('hasNewData', @communicationLine)
+      
+      
+class MorseDecoder extends Backbone.Model
 
+   initializeKey: =>
+      @key = {}
+      @key['' + kDotToken + kDashToken] = 'A'
+      @key['' + kDashToken + kDotToken + kDotToken + kDotToken] = 'B'
+      @key['' + kDashToken + kDotToken + kDashToken + kDotToken] = 'C'
+      @key['' + kDashToken + kDotToken + kDotToken] = 'D'
+      @key['' + kDotToken] = 'E'
+      @key['' + kDotToken + kDotToken + kDashToken + kDotToken] = 'F'
+      @key['' + kDashToken + kDashToken + kDotToken] = 'G'
+      @key['' + kDotToken + kDotToken + kDotToken + kDotToken] = 'H'
+      @key['' + kDotToken + kDotToken] = 'I'
+      @key['' + kDotToken + kDashToken + kDashToken + kDashToken] = 'J'
+      @key['' + kDashToken + kDotToken + kDashToken] = 'K'
+      @key['' + kDotToken + kDashToken + kDotToken + kDotToken] = 'L'
+      @key['' + kDashToken + kDashToken] = 'M'
+      @key['' + kDashToken + kDotToken] = 'N'
+      @key['' + kDashToken + kDashToken + kDashToken] = 'O'
+      @key['' + kDotToken + kDashToken + kDashToken + kDotToken] = 'P'
+      @key['' + kDashToken + kDashToken + kDotToken + kDashToken] = 'Q'
+      @key['' + kDotToken + kDashToken + kDotToken] ='R'
+      @key['' + kDotToken + kDotToken + kDotToken] = 'S'
+      @key['' + kDashToken] = 'T'
+      @key['' + kDotToken + kDotToken + kDashToken] = 'U'
+      @key['' + kDotToken + kDotToken + kDotToken + kDashToken] = 'V'
+      @key['' + kDotToken + kDashToken + kDashToken] = 'W'
+      @key['' + kDashToken + kDotToken + kDotToken + kDashToken] = 'X'
+      @key['' + kDashToken + kDotToken + kDashToken + kDashToken] = 'Y'
+      @key['' + kDashToken + kDashToken + kDotToken + kDotToken] = 'Z'
+   
+   initialize: =>
+      @inputTokens = []
+      @numEmptyTokensInARow = 0
+      @initializeKey()
+      
+      
+   processToken: (token) =>
+      if token == ''
+         @parseTokens() if ++@numEmptyTokensInARow >= 10
+      else if token == kWordStopToken
+         @parseTokens() if @inputTokens.length > 0
+         @trigger('parsedCharacter', ' ')
+      else
+         @inputTokens.push(token)
+         @numEmptyTokensInARow = 0
+   
+   parseTokens: =>
+      if @inputTokens.length > 0
+         token = @key[@inputTokens.join('')]
+         @trigger('parsedCharacter', token) if token != undefined
+      @numEmptyTokensInARow = 0
+      @inputTokens.length = 0
+       
 
 class StraightKeyInput extends Backbone.View
 
@@ -43,11 +99,11 @@ class StraightKeyInput extends Backbone.View
    
    sendUserInput: =>
       if @wordStopFlag
-         @model.addToken kWordStopToken
+         @model.addToken(kWordStopToken)
       else if @dashFlag
-         @model.addToken kDashToken
+         @model.addToken(kDashToken)
       else
-         @model.addToken kDotToken
+         @model.addToken(kDotToken)
 
       clearTimeout(@dashTimer)
       clearTimeout(@wordStopTimer)
@@ -57,7 +113,7 @@ class StraightKeyInput extends Backbone.View
 
 class CommunicationLineView extends Backbone.View
    initialize: ->
-      @model.bind 'hasNewData', @render
+      @model.bind('hasNewData', @render)
       
    render: (tokens) =>
       context = document.getElementById("communicationLineCanvas").getContext('2d')
@@ -77,6 +133,16 @@ class CommunicationLineView extends Backbone.View
             else if kWordStopToken == token
                context.fillRect((50 * tokenNum) + 30, 5, 10, 20)
             tokenNum += 1
+            
+
+class DecoderView extends Backbone.View
+   initialize: ->
+      @model.bind('parsedCharacter', @render)
+   
+   render: (token) =>
+      messageBox = $('#messageBox')
+      messageBox.val(messageBox.val() + token)
+
                
 drawSignalLine = (context) ->
    context.moveTo(0, 30)
@@ -86,13 +152,20 @@ drawSignalLine = (context) ->
    context.stroke();
       
 init = ->
-   model = new CommunicationLine
-   straightKey = new StraightKeyInput 'el': $('#straight-key-div'), 'model': model
-   communicationLineView = new CommunicationLineView 'el': $('#communication-line-div'), 'model': model
+   decoder = new MorseDecoder
+   communicationLine = new CommunicationLine('decoder': decoder)
+   straightKey = new StraightKeyInput('el': $('#straight-key-div'), 'model': communicationLine)
+   communicationLineView = new CommunicationLineView('el': $('#communication-line-div'), 'model': communicationLine)
+   decoderView = new DecoderView('el': $('messageBoxDiv'), 'model':decoder)
+   
+   _.extend(communicationLineView, Backbone.Events)
+   communicationLineView.on("tokenReachedReceiver", (token) ->
+      decoder.test()
+   )
    
    context = document.getElementById("communicationLineCanvas").getContext('2d')
    context.clearRect(0, 0, context.canvas.width, context.canvas.height);
-   drawSignalLine context
+   drawSignalLine(context)
 
 $(document).ready init
 

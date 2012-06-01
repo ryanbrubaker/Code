@@ -9,6 +9,7 @@
 
 {% block content %}
 
+<div style="-webkit-user-select: none; -moz-user-select: none;">
 <h1>Best Friends</h1>
 <p>Send Morse code to your friend across the street.</p>
 
@@ -19,15 +20,15 @@
 <div class="row">
    
    <div id="straight-key-div" class="span2">
-      <a class="btn" style="webkit-user-select: none;" id="straight-key">Morse Code</a>
+      <a class="btn" id="straight-key">Morse Code</a>
    </div>
    
    <div id="communication-line-div" class="span6">
       <canvas id="communicationLineCanvas" width="500" height="50"></canvas>
    </div>
    
-   <div class="span1 offset1">
-      <textarea id="morse-receiver"></textarea>
+   <div id="messageBoxDiv" class="span1 offset1">
+      <textarea id="messageBox"></textarea>
    </div>
 </div>
 
@@ -103,12 +104,14 @@
       <tr>
          <td>I</td>
          <td>&#149 &#149</td>
-         <td>Q</td>
+         <td>R</td>
          <td>&#149 &#150 &#149</td>
          <td />
          <td />
       </tr>
    </table>
+</div>
+
 </div>
 {% endblock content %}
 
